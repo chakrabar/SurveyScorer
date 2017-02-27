@@ -16,21 +16,24 @@ class Program
         Console.WriteLine($"Scoring config = {AppSettings.ScoringRulesConfigPath}");
         Console.WriteLine($"Output directory = {AppSettings.OutputDirectory}");
         //Verify.TestSerialization();
+        Console.WriteLine("Press `Enter` to continue...");
+        Console.ReadLine();
 
         string scoringXml = File.ReadAllText(AppSettings.ScoringRulesConfigPath);
         ScoringConfig config = XmlHelper.DeserializeData<ScoringConfig>(scoringXml);
+        var outputDir = FileHelper.CreateDirectoryWithTimestamp(AppSettings.OutputDirectory, null);
 
         //here is the actual application logic
         var scores = new SurveyExcelReader().ReadFromExcelFile(AppSettings.SurveyResultFilePath, config);
 
         var excelSummary = SurveyResultGenerator.CreateExcel(scores);
-        FileHelper.WriteToFile(excelSummary, AppSettings.OutputDirectory, AppSettings.OutputFilePrefix, "xlsx");
+        FileHelper.WriteToFile(excelSummary, outputDir, AppSettings.OutputFilePrefix, "xlsx");
 
-        var html = SurveyReportGenerator.Create(scores[0], AppSettings.ReportTemplatePath);
+        //var html = SurveyReportGenerator.Create(scores[0], AppSettings.ReportTemplatePath);
+        SurveyReportGenerator.Process(scores, AppSettings.ReportTemplatePath, outputDir);
 
-        //this section needs to be cleaned later
-
-        Console.WriteLine("Scores calculated & reports generated.");
+        Console.WriteLine("Scores calculated & reports generated. See output directory.");
         Console.WriteLine("Press `Enter` to exit...");
+        Console.ReadLine();
     }
 }

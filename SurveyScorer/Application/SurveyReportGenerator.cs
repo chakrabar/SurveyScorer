@@ -1,4 +1,5 @@
-﻿using SurveyScorer.Entities.Response;
+﻿using SurveyScorer.Application.Helpers;
+using SurveyScorer.Entities.Response;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,6 +8,16 @@ namespace SurveyScorer.Application
 {
     public class SurveyReportGenerator
     {
+        //TODO: this method should move out of this class
+        public static void Process(IEnumerable<ScoreCard> scoreCards, string templatePath, string outputDirectory)
+        {
+            foreach (var card in scoreCards)
+            {
+                var reportString = Create(card, templatePath);
+                FileHelper.WriteToFile(reportString, outputDirectory, AppSettings.ReportPrefix, "html");
+            }
+        }
+
         public static string Create(ScoreCard scoreCard, string templatePath)
         {
             var templateContent = File.ReadAllText(templatePath);
