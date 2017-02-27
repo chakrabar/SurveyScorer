@@ -5,6 +5,7 @@
 *.suo
 **/Data/**
 **/Results/**
+*.user
 
 # =========================
 # Git AutoCreated ignores v
