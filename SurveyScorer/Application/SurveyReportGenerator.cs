@@ -1,4 +1,5 @@
 ﻿using SurveyScorer.Entities.Response;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -6,13 +7,31 @@ namespace SurveyScorer.Application
 {
     public class SurveyReportGenerator
     {
-        public string Create(ScoreCard scoreCard, string templatePath)
+        public static string Create(ScoreCard scoreCard, string templatePath)
         {
             var templateContent = File.ReadAllText(templatePath);
 
-            //TODO: populate metadata
+            templateContent = PopulateMetadata(scoreCard.Metadata, templateContent);
             templateContent = PopulateScoreItems(scoreCard.ScoreItems, templateContent);
+            templateContent = PopulateTopLevelDetails(scoreCard, templateContent);
 
+            return templateContent;
+        }
+
+        private static string PopulateTopLevelDetails(ScoreCard scoreCard, string templateContent)
+        {
+            templateContent = templateContent.Replace("@@year", DateTime.Now.Year.ToString());
+            templateContent = templateContent.Replace("@@score-class", scoreCard.ResultColor.ToString().ToLower());
+            templateContent = templateContent.Replace("@@score", scoreCard.Aggregate.ToString());
+            return templateContent;
+        }
+
+        private static string PopulateMetadata(IEnumerable<MetaResponse> metadata, string templateContent)
+        {
+            foreach (var meta in metadata)
+            {
+                templateContent = templateContent.Replace($"@@{meta.ReportTag}", meta.Response);
+            }
             return templateContent;
         }
 
@@ -20,8 +39,8 @@ namespace SurveyScorer.Application
         {
             foreach (var scoreItem in scoreItems)
             {
-                templateContent = templateContent.Replace(scoreItem.ReportTag, scoreItem.Response);
-                templateContent = templateContent.Replace($"{scoreItem.ReportTag}-class", scoreItem.StateColor.ToString().ToLower());
+                templateContent = templateContent.Replace($"@@{scoreItem.ReportTag}-class", scoreItem.StateColor.ToString().ToLower());
+                templateContent = templateContent.Replace($"@@{scoreItem.ReportTag}", scoreItem.Response);                
             }
 
             return templateContent;

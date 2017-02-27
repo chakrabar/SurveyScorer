@@ -22,9 +22,12 @@ class Program
 
         //here is the actual application logic
         var scores = new SurveyExcelReader().ReadFromExcelFile(AppSettings.SurveyResultFilePath, config);
-        var excelSummary = SurveyResultGenerator.CreateExcel(scores);
 
+        var excelSummary = SurveyResultGenerator.CreateExcel(scores);
         FileHelper.WriteToFile(excelSummary, AppSettings.OutputDirectory, AppSettings.OutputFilePrefix, "xlsx");
+
+        var html = SurveyReportGenerator.Create(scores[0], AppSettings.ReportTemplatePath);
+
         //this section needs to be cleaned later
 
         Console.WriteLine("Scores calculated & reports generated.");
