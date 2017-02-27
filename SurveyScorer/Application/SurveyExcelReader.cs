@@ -2,6 +2,7 @@
 using SurveyScorer.Application.Helpers;
 using SurveyScorer.Entities.Response;
 using SurveyScorer.Entities.Survey;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,6 +45,10 @@ namespace SurveyScorer.Application
                             StateColor = result.StateColor
                         });
                     }
+                    scorecard.Aggregate = (int)Math.Round(scorecard.ScoreItems.Sum(si => si.Score), 2);
+                    scorecard.ResultColor = scorecard.Aggregate < 70 ? 
+                                                Entities.Enums.ResultColor.Red : 
+                                                (scorecard.Aggregate >= 90 ? Entities.Enums.ResultColor.Green : Entities.Enums.ResultColor.Yellow);
                     allScores.Add(scorecard);
                 }
             }

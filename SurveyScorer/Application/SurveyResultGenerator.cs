@@ -1,87 +1,118 @@
 ﻿using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using SurveyScorer.Entities.Enums;
 using SurveyScorer.Entities.Response;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
+using System.Linq;
 
 namespace SurveyScorer.Application
 {
     public class SurveyResultGenerator
     {
-        public static void CreateExcel(IEnumerable<ScoreCard> scoreCards)
+        static Color _fadedGray = System.Drawing.ColorTranslator.FromHtml("#F7FAFA");
+        static Color _darkGray = System.Drawing.ColorTranslator.FromHtml("#848686");
+        static Color _red = System.Drawing.ColorTranslator.FromHtml("#E3A098");
+        static Color _yellow = System.Drawing.ColorTranslator.FromHtml("#F2E963");
+        static Color _green = System.Drawing.ColorTranslator.FromHtml("#72CC68");
+
+        public static byte[] CreateExcel(IEnumerable<ScoreCard> scoreCards)
         {
-            
+            using (ExcelPackage xlPackage = new ExcelPackage())
+            {
+                var ws = xlPackage.Workbook.Worksheets.Add("SurveyResults");
+
+                var totalColumns = SetExcelHeaders(scoreCards, ws); //aggregate score 1 column
+                var totalRows = scoreCards.Count() + 1;
+                FormatExcel(ws, totalRows, totalColumns);
+
+                PopulateResultDetails(scoreCards, ws);
+
+                return xlPackage.GetAsByteArray();
+            }
         }
 
-        Color _fadedGray = System.Drawing.ColorTranslator.FromHtml("#F7FAFA");
-        Color _darkGray = System.Drawing.ColorTranslator.FromHtml("#848686");
-        //public byte[] Download(string jobId, string version)
-        //{
-        //    using (ExcelPackage xlPackage = new ExcelPackage())
-        //    {
-        //        var ws = xlPackage.Workbook.Worksheets.Add("SurveyResults");
-        //        SetExcelHeader(ws);
-        //        var productLinkingJob = ProductLinkingDataService.GetProductLinkingJobDetails(jobId);
-        //        var packagedeviceDetails = ProductLinkingDataService.GetPackageAndLinkedDeviceDetails(
-        //            productLinkingJob.SourceProducts.Select(x => x.ProductCode).ToList(), productLinkingJob.DestinationProducts.Select(d => d.ProductCode).ToList());
-        //        var inflightPackageDeviceDetails = ProductLinkingDataService.GetInFlightPackageAndLinkedDeviceDetails(productLinkingJob);
-        //        var rows = SetExcelDataAndGetNumberOfRows(ws, packagedeviceDetails.Item1, packagedeviceDetails.Item2, inflightPackageDeviceDetails);
-        //        FormatExcel(ws, rows, 14);
-        //        ProtectExcelSheet(ws);
-        //        ProtectExcelWorkBook(xlPackage);
-        //        SetEditableCells(ws, rows);
-        //        return xlPackage.GetAsByteArray();
-        //    }
-        //}
+        private static void PopulateResultDetails(IEnumerable<ScoreCard> scoreCards, ExcelWorksheet ws)
+        {
+            var row = 2;
+            foreach (var scorecard in scoreCards)
+            {
+                var column = 1;
+                foreach (var meta in scorecard.Metadata)
+                {
+                    ws.Cells[row, column].Value = meta.Response;
+                    column++;
+                }
+                foreach (var scoreItem in scorecard.ScoreItems)
+                {
+                    ws.Cells[row, column].Value = scoreItem.Response;
+                    ws.Cells[row, column].Style.Fill.BackgroundColor.SetColor(GetCellColor(scoreItem.StateColor));
+                    column++;
+                }
+                ws.Cells[row, column].Value = scorecard.Aggregate;
+                ws.Cells[row, column].Style.Fill.BackgroundColor.SetColor(GetCellColor(scorecard.ResultColor));
+                row++;
+            }
+        }
 
-        //private void SetExcelHeader(ExcelWorksheet ws)
-        //{
+        private static Color GetCellColor(ResultColor stateColor)
+        {
+            switch (stateColor)
+            {
+                case ResultColor.Red:
+                    return _red;
+                case ResultColor.Yellow:
+                    return _yellow;
+                case ResultColor.Green:
+                    return _green;
+                default:
+                    break;
+            }
+            return _fadedGray;
+        }
 
-        //    ws.Cells[1, 1].Value = Constants.ExcelHeader.MANUFACTURER;
-        //    ws.Cells[1, 1].Value = Constants.ExcelHeader.MANUFACTURER;
-        //    ws.Cells[1, 2].Value = Constants.ExcelHeader.MODEL;
-        //    ws.Cells[1, 3].Value = Constants.ExcelHeader.COLOUR;
-        //    ws.Cells[1, 4].Value = Constants.ExcelHeader.MEMORY;
-        //    ws.Cells[1, 5].Value = Constants.ExcelHeader.PRODUCT_NAME;
-        //    ws.Cells[1, 6].Value = Constants.ExcelHeader.PRODUCT_CODE;
-        //    ws.Cells[1, 7].Value = Constants.ExcelHeader.PACKAGE;
-        //    ws.Cells[1, 8].Value = Constants.ExcelHeader.PACKAGE_PRODUCT_CODE;
-        //    ws.Cells[1, 9].Value = Constants.ExcelHeader.TIER;
-        //    ws.Cells[1, 10].Value = Constants.ExcelHeader.PACKAGE_RENTAL;
-        //    ws.Cells[1, 11].Value = Constants.ExcelHeader.TERM;
-        //    ws.Cells[1, 12].Value = Constants.ExcelHeader.LINKED;
-        //    ws.Cells[1, 13].Value = Constants.ExcelHeader.PRICE;
-        //    ws.Cells[1, 14].Value = Constants.ExcelHeader.REVENUE_CODE;
-        //}
-        //private void FormatExcel(ExcelWorksheet ws, int rowCount, int columnCount)
-        //{
-        //    if (rowCount == 0)
-        //        return;
+        //Assumption 01 - all scorecards have equal number of meta & questions
+        //Assumption 02 - all meta & questions are order in same way
+        private static int SetExcelHeaders(IEnumerable<ScoreCard> scoreCards, ExcelWorksheet ws)
+        {
+            int column = 1;
+            foreach (var meta in scoreCards.First().Metadata)
+            {
+                ws.Cells[1, column].Value = meta.Query;
+                column++;
+            }
+            foreach (var scoreItem in scoreCards.First().ScoreItems)
+            {
+                ws.Cells[1, column].Value = scoreItem.Query;
+                column++;
+            }
+            ws.Cells[1, column].Value = "Total";
 
-        //    var allCells = ws.Cells[1, 1, rowCount + 1, columnCount]; //with header
+            return column;
+        }
 
-        //    var border = allCells.Style.Border.Top.Style
-        //                = allCells.Style.Border.Left.Style
-        //                = allCells.Style.Border.Right.Style
-        //                = allCells.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+        static void FormatExcel(ExcelWorksheet ws, int totalRows, int totalColumns)
+        {
+            if (totalRows == 0)
+                return;
 
-        //    allCells.AutoFilter = true; //auto enable filters in all columns
+            var allCells = ws.Cells[1, 1, totalRows, totalColumns]; //with header
 
-        //    allCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            var border = allCells.Style.Border.Top.Style
+                        = allCells.Style.Border.Left.Style
+                        = allCells.Style.Border.Right.Style
+                        = allCells.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
 
-        //    allCells.Style.Fill.BackgroundColor.SetColor(_fadedGray);
+            allCells.AutoFilter = true; //auto enable filters in all columns
 
-        //    for (int i = 1; i <= columnCount; i++)
-        //        ws.Column(i).AutoFit(); //autofit all columns
+            allCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
 
-        //    ws.Column(12).Width = 13.71;
-        //    ws.Column(14).Width = 16;//Set the Linked column width manually
+            allCells.Style.Fill.BackgroundColor.SetColor(_fadedGray);
 
-        //    ws.Cells[1, 1, 1, 14].Style.Fill.PatternType = ExcelFillStyle.Solid; //header
-        //    ws.Cells[1, 7, 1, 11].Style.Fill.BackgroundColor.SetColor(Color.LightSeaGreen);
+            for (int i = 1; i <= totalColumns; i++)
+                ws.Column(i).AutoFit(); //autofit all columns
 
-        //    ws.Cells[1, 12, 1, 14].Style.Fill.BackgroundColor.SetColor(Color.Bisque); //Header editable background  
-        //}
+            ws.Cells[1, 1, 1, totalColumns].Style.Fill.BackgroundColor.SetColor(Color.LightSeaGreen);
+        }
     }
 }
