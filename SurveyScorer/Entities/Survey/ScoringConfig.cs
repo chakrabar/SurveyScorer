@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace SurveyScorer.Entities.Survey
 {
@@ -7,5 +6,7 @@ namespace SurveyScorer.Entities.Survey
     {
         [XmlElement("Question")]
         public Question[] Questions { get; set; }
+        [XmlElement("Metadata")]
+        public Metadata[] Metadata { get; set; }
     }
 }

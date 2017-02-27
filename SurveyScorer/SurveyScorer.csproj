@@ -9,8 +9,4 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.0" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Application\" />
-    <Folder Include="Entities\" />
-  </ItemGroup>
 </Project>

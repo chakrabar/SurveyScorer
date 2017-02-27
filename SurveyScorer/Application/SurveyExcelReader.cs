@@ -1,7 +1,7 @@
-﻿using SurveyScorer.Application.Helpers;
+﻿using OfficeOpenXml;
+using SurveyScorer.Application.Helpers;
 using SurveyScorer.Entities.Response;
 using SurveyScorer.Entities.Survey;
-using OfficeOpenXml;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,11 +25,12 @@ namespace SurveyScorer.Application
                 var totalRows = worksheet.Dimension.End.Row;
                 var totalColumns = worksheet.Dimension.End.Column;
 
+                PopulateMetaColumnNumbers(scoringConfig, worksheet, totalColumns);
                 PopulateColumnNumbers(scoringConfig, worksheet, totalColumns);
 
                 for (int rowNum = 2; rowNum <= totalRows; rowNum++)
                 {
-                    var scorecard = GetScoreMetadata(worksheet, rowNum);
+                    var scorecard = GetScorecardWithMetadata(worksheet, scoringConfig, rowNum);
                     foreach (var rule in scoringConfig.Questions)
                     {
                         var response = worksheet.GetCellValue(rowNum, rule.ColumnNumber.Value);
@@ -49,16 +50,23 @@ namespace SurveyScorer.Application
             return allScores;
         }
 
-        private static ScoreCard GetScoreMetadata(ExcelWorksheet worksheet, int rowNum)
+        private static ScoreCard GetScorecardWithMetadata(ExcelWorksheet worksheet, ScoringConfig scoringConfig, int rowNum)
         {
-            return new ScoreCard()
+            var scorecard = new ScoreCard()
             {
-                Project = worksheet.GetCellValue(rowNum, 3),
-                BU = worksheet.GetCellValue(rowNum, 4),
-                Client = worksheet.GetCellValue(rowNum, 5),
-                TechLead = worksheet.GetCellValue(rowNum, 6),
-                ScoreItems = new List<CategoryScore>()
+                ScoreItems = new List<CategoryScore>(),
+                Metadata = new List<MetaResponse>()
             };
+            foreach (var rule in scoringConfig.Metadata)
+            {
+                scorecard.Metadata.Add(new MetaResponse
+                {
+                    Query = rule.Query,
+                    ReportTag = rule.ReportTag,
+                    Response = worksheet.GetCellValue(rowNum, rule.ColumnNumber.Value)
+                });
+            }
+            return scorecard;
         }
 
         private static void PopulateColumnNumbers(ScoringConfig ruleConfig, ExcelWorksheet worksheet, int totalColumns)
@@ -71,6 +79,19 @@ namespace SurveyScorer.Application
 
                 if (ruleToUpdate != null)
                     ruleToUpdate.ColumnNumber = col;
+            }
+        }
+
+        private static void PopulateMetaColumnNumbers(ScoringConfig ruleConfig, ExcelWorksheet worksheet, int totalColumns)
+        {
+            for (int col = 1; col <= totalColumns; col++)
+            {
+                var colHeader = worksheet.GetCellValue(1, col);
+                var metaToUpdate = ruleConfig.Metadata
+                    .FirstOrDefault(m => m.Query.Trim().ToLower() == colHeader.Trim().ToLower());
+
+                if (metaToUpdate != null)
+                    metaToUpdate.ColumnNumber = col;
             }
         }
 

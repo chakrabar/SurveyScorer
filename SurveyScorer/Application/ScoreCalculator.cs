@@ -1,7 +1,7 @@
-﻿using SurveyScorer.Entities.Response;
+﻿using SurveyScorer.Entities.Enums;
+using SurveyScorer.Entities.Response;
 using SurveyScorer.Entities.Survey;
 using System.Linq;
-using SurveyScorer.Entities.Enums;
 
 namespace SurveyScorer.Application
 {

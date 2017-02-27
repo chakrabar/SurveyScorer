@@ -1,7 +1,7 @@
-﻿using SurveyScorer.Application;
+﻿using SurveyScorer;
+using SurveyScorer.Application;
 using SurveyScorer.Application.Helpers;
 using SurveyScorer.Entities.Survey;
-using SurveyScorer;
 using System;
 using System.IO;
 
