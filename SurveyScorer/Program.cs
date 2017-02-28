@@ -27,7 +27,7 @@ class Program
         var scores = new SurveyExcelReader().ReadFromExcelFile(AppSettings.SurveyResultFilePath, config);
 
         var excelSummary = SurveyResultGenerator.CreateExcel(scores);
-        FileHelper.WriteToFile(excelSummary, outputDir, AppSettings.OutputFilePrefix, "xlsx");
+        FileHelper.CreateFileWithTimestampAndWrite(excelSummary, outputDir, AppSettings.OutputFilePrefix, "xlsx");
 
         //var html = SurveyReportGenerator.Create(scores[0], AppSettings.ReportTemplatePath);
         SurveyReportGenerator.Process(scores, AppSettings.ReportTemplatePath, outputDir);

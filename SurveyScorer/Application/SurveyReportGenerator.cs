@@ -11,10 +11,12 @@ namespace SurveyScorer.Application
         //TODO: this method should move out of this class
         public static void Process(IEnumerable<ScoreCard> scoreCards, string templatePath, string outputDirectory)
         {
+            var reportCount = 1;
             foreach (var card in scoreCards)
             {
                 var reportString = Create(card, templatePath);
-                FileHelper.WriteToFile(reportString, outputDirectory, AppSettings.ReportPrefix, "html");
+                var fileNamePrefix = $"{AppSettings.ReportPrefix}_{reportCount.ToString("000")}";
+                FileHelper.CreateFileWithTimestampAndWrite(reportString, outputDirectory, fileNamePrefix, "html");
             }
         }
 

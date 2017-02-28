@@ -5,7 +5,7 @@ namespace SurveyScorer.Application.Helpers
 {
     public class FileHelper
     {
-        public static string WriteToFile(byte[] data, string directory, string fileName = null, string fileExtension = null)
+        public static string CreateFileWithTimestampAndWrite(byte[] data, string directory, string fileName = null, string fileExtension = null)
         {
             try
             {
@@ -21,7 +21,7 @@ namespace SurveyScorer.Application.Helpers
             }
         }
 
-        public static string WriteToFile(string data, string directory, string fileName = null, string fileExtension = null)
+        public static string CreateFileWithTimestampAndWrite(string data, string directory, string fileName = null, string fileExtension = null)
         {
             try
             {
