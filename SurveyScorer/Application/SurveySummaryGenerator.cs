@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace SurveyScorer.Application
 {
-    public class SurveyResultGenerator
+    public class SurveySummaryGenerator
     {
         static Color _fadedGray = System.Drawing.ColorTranslator.FromHtml("#F7FAFA");
         static Color _darkGray = System.Drawing.ColorTranslator.FromHtml("#848686");
@@ -43,14 +43,16 @@ namespace SurveyScorer.Application
                     ws.Cells[row, column].Value = meta.Response;
                     column++;
                 }
-                foreach (var scoreItem in scorecard.ScoreItems)
-                {
-                    ws.Cells[row, column].Value = scoreItem.Response;
-                    ws.Cells[row, column].Style.Fill.BackgroundColor.SetColor(GetCellColor(scoreItem.StateColor));
-                    column++;
-                }
                 ws.Cells[row, column].Value = scorecard.Aggregate;
                 ws.Cells[row, column].Style.Fill.BackgroundColor.SetColor(GetCellColor(scorecard.ResultColor));
+                ws.Cells[row, column].Style.Font.Bold = true;
+                column++;
+                foreach (var scoreItem in scorecard.ScoreItems)
+                {
+                    ws.Cells[row, column].Value = $"[{scoreItem.Score}] {scoreItem.Response}";
+                    ws.Cells[row, column].Style.Fill.BackgroundColor.SetColor(GetCellColor(scoreItem.StateColor));
+                    column++;
+                }                
                 row++;
             }
         }
@@ -81,14 +83,14 @@ namespace SurveyScorer.Application
                 ws.Cells[1, column].Value = meta.Query;
                 column++;
             }
+            ws.Cells[1, column++].Value = "Total";
             foreach (var scoreItem in scoreCards.First().ScoreItems)
             {
                 ws.Cells[1, column].Value = scoreItem.Query;
                 column++;
-            }
-            ws.Cells[1, column].Value = "Total";
+            }            
 
-            return column;
+            return --column;
         }
 
         static void FormatExcel(ExcelWorksheet ws, int totalRows, int totalColumns)
