@@ -16,7 +16,16 @@ namespace SurveyScorer.Application
                 var selectedOption = question.Options
                     .FirstOrDefault(o => o.Value.Trim().ToLower() == response.Trim().ToLower());
                 if (selectedOption != null)
+                {
                     result.Score = selectedOption.Score;
+                }
+                else //response didn't match any option
+                {
+                    //bespoke logic for "Other"
+                    var otherOption = question.Options.FirstOrDefault(op => op.Value.Trim().ToLower() == "other");
+                    if (otherOption != null)
+                        result.Score = otherOption.Score;
+                }                    
             }
             else
             {
@@ -24,6 +33,19 @@ namespace SurveyScorer.Application
                     .Where(o => response.ToLower().Contains(o.Value.Trim().ToLower()));
                 if (selectedOptions.Any())
                     result.Score = selectedOptions.Sum(op => op.Score);
+                //bespoke logic for "Other"                
+                var otherOption = question.Options.FirstOrDefault(op => op.Value.Trim().ToLower() == "other");
+                if (otherOption != null)
+                {
+                    var check = new string(response.ToArray()); //bwahahhaahaha 
+                    foreach (var option in question.Options)
+                    {
+                        check = check.Replace(option.Value, "");
+                    }
+                    check = check.Replace(",", "").Trim(); //removing comma separators
+                    if (!string.IsNullOrWhiteSpace(check))
+                        result.Score += otherOption.Score;
+                }
             }
 
             if (question.ScoringRule.GreenScore.HasValue && result.Score >= question.ScoringRule.GreenScore)

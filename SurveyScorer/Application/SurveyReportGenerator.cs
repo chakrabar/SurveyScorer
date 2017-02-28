@@ -29,6 +29,7 @@ namespace SurveyScorer.Application
             return templateContent;
         }
 
+        //TODO: need to generalize more
         private static string PopulateTopLevelDetails(ScoreCard scoreCard, string templateContent)
         {
             templateContent = templateContent.Replace("@@year", DateTime.Now.Year.ToString());
