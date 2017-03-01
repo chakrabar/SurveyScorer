@@ -29,6 +29,8 @@ namespace SurveyScorer.Application
                 PopulateMetaColumnNumbers(scoringConfig, worksheet, totalColumns);
                 PopulateColumnNumbers(scoringConfig, worksheet, totalColumns);
 
+                var aggregateRules = ScoreCalculator.GetAggregateRules(scoringConfig);
+
                 for (int rowNum = 2; rowNum <= totalRows; rowNum++)
                 {
                     var scorecard = GetScorecardWithMetadata(worksheet, scoringConfig, rowNum);
@@ -45,10 +47,10 @@ namespace SurveyScorer.Application
                             StateColor = result.StateColor
                         });
                     }
-                    scorecard.Aggregate = Math.Round(scorecard.ScoreItems.Sum(si => si.Score), 2); //(int)
-                    scorecard.ResultColor = scorecard.Aggregate < 70 ? 
-                                                Entities.Enums.ResultColor.Red : 
-                                                (scorecard.Aggregate >= 90 ? Entities.Enums.ResultColor.Green : Entities.Enums.ResultColor.Yellow);
+
+                    var aggregateResult = ScoreCalculator.GetAggregate(scorecard, aggregateRules.RedScore, aggregateRules.GreenScore);
+                    scorecard.Aggregate = aggregateResult.Sum;
+                    scorecard.ResultColor = aggregateResult.Color;
                     allScores.Add(scorecard);
                 }
             }

@@ -1,6 +1,7 @@
 ﻿using SurveyScorer.Entities.Enums;
 using SurveyScorer.Entities.Response;
 using SurveyScorer.Entities.Survey;
+using System;
 using System.Linq;
 
 namespace SurveyScorer.Application
@@ -56,6 +57,30 @@ namespace SurveyScorer.Application
                 result.StateColor = ResultColor.Yellow;
 
             return result;
+        }
+
+        //TODO: overall RED-GREEN rules are hard coded as 70% and 85% - should be configurable
+        internal static (decimal RedScore, decimal GreenScore) GetAggregateRules(ScoringConfig scoringConfig)
+        {
+            var maxPossibleScore = scoringConfig.Questions
+                .Aggregate(0.0m, (current, next) =>
+                    current + (next.SingleAnswerOnly ?
+                                next.Options.Max(op => op.Score) :
+                                next.Options.Sum(op => op.Score)));
+            var redScore = maxPossibleScore * 0.7m;
+            var greenScore = maxPossibleScore * 0.85m;
+            return (redScore, greenScore);
+        }
+
+        internal static (decimal Sum, ResultColor Color) GetAggregate(ScoreCard scoreCard, decimal redScore, decimal greenScore)
+        {
+            
+            var aggregate = Math.Round(scoreCard.ScoreItems.Sum(si => si.Score), 2);
+            
+            var resultColor = aggregate < redScore ?
+                                        ResultColor.Red :
+                                        (aggregate >= greenScore ? ResultColor.Green : ResultColor.Yellow);
+            return (aggregate, resultColor);
         }
     }
 }

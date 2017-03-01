@@ -10,11 +10,11 @@ namespace SurveyScorer.Application
 {
     public class SurveySummaryGenerator
     {
-        static Color _fadedGray = System.Drawing.ColorTranslator.FromHtml("#F7FAFA");
-        static Color _darkGray = System.Drawing.ColorTranslator.FromHtml("#848686");
-        static Color _red = System.Drawing.ColorTranslator.FromHtml("#E3A098");
-        static Color _yellow = System.Drawing.ColorTranslator.FromHtml("#F2E963");
-        static Color _green = System.Drawing.ColorTranslator.FromHtml("#72CC68");
+        static Color _fadedGray = ColorTranslator.FromHtml("#F7FAFA");
+        static Color _darkGray = ColorTranslator.FromHtml("#848686");
+        static Color _red = ColorTranslator.FromHtml("#E3A098");
+        static Color _yellow = ColorTranslator.FromHtml("#F2E963");
+        static Color _green = ColorTranslator.FromHtml("#94d98c");
 
         public static byte[] CreateExcel(IEnumerable<ScoreCard> scoreCards)
         {
