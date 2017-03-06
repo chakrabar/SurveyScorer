@@ -67,8 +67,8 @@ namespace SurveyScorer.Application
                     current + (next.SingleAnswerOnly ?
                                 next.Options.Max(op => op.Score) :
                                 next.Options.Sum(op => op.Score)));
-            var redScore = maxPossibleScore * 0.7m;
-            var greenScore = maxPossibleScore * 0.85m;
+            var redScore = maxPossibleScore * (scoringConfig.AggregateYellowPercentage / 100m);
+            var greenScore = maxPossibleScore * (scoringConfig.AggregateGreenPercentage / 100m);
             return (redScore, greenScore);
         }
 
