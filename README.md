@@ -18,6 +18,6 @@ To use the application
     1. Build it (targetting whichever platrom you need)
     2. Create files [2] and [3] as said above
     3. Get your result set (responses of the survey/exam in .xlsx format)
-    4. Update the `appsettings.json` file and set valid values for all fields
+    4. Update the 'appsettings.json' file and set valid values for all fields
     5. Run the application
-    6. Your desired results will be in `output.directory` as specified in [4]
+    6. Your desired results will be in 'output.directory' as specified in [4]
