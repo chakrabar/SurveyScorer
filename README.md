@@ -8,7 +8,7 @@ Basically I created this tool to generate aggregate resilts/scores from differen
     2. The scoring criteria in XML format
     3. An HTML template for individual results/marksheets
     
-This is written on C# using targetting .NETCore1.0  
+This is written on `C#` using targetting `.NETCore1.0`  
 You can build it to be a standalone executable or portable application (the client machine will need .Net framework)
 
 ---
